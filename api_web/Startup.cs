@@ -1,8 +1,12 @@
+using api_web.Interfaces;
+using api_web.Models;
+using api_web.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 
 namespace api_web
@@ -19,6 +23,14 @@ namespace api_web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            // requires using Microsoft.Extensions.Options
+            services.Configure<StudentDB>(
+                Configuration.GetSection(nameof(StudentDB)));
+
+            services.AddSingleton<ISettingDB>(sp =>
+                sp.GetRequiredService<IOptions<StudentDB>>().Value);
+            services.AddSingleton<StudentService>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -40,7 +52,6 @@ namespace api_web
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
